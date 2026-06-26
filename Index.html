@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Stack — From Markup to Machine Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0E1116;
+    --bg-soft: #14181F;
+    --ink: #E8E6E0;
+    --ink-dim: #9AA0AC;
+    --line: #232831;
+
+    --html: #C97B4A;
+    --css: #3FA796;
+    --api: #E0B33A;
+    --react: #8B7FD6;
+    --node: #6FA86F;
+    --ai: #D6536D;
+
+    --display: 'Space Grotesk', sans-serif;
+    --body: 'Inter', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--body);
+    line-height:1.5;
+    overflow-x:hidden;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; scroll-behavior:auto !important; }
+  }
+
+  a{ color:inherit; }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    min-height:92vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    padding:6vh 6vw;
+    position:relative;
+  }
+
+  .hero-eyebrow{
+    font-family:var(--mono);
+    font-size:0.78rem;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+    margin-bottom:1.6rem;
+  }
+
+  .hero h1{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:clamp(2.4rem, 7vw, 5.2rem);
+    line-height:1.04;
+    letter-spacing:-0.01em;
+    max-width:16ch;
+  }
+
+  .hero h1 .grad{
+    background:linear-gradient(90deg, var(--html), var(--css), var(--api), var(--react), var(--node), var(--ai));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+
+  .hero p{
+    margin-top:1.6rem;
+    max-width:46ch;
+    font-size:1.05rem;
+    color:var(--ink-dim);
+  }
+
+  .hero-scroll{
+    margin-top:3.2rem;
+    font-family:var(--mono);
+    font-size:0.75rem;
+    color:var(--ink-dim);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:0.5rem;
+    animation:bob 2.2s ease-in-out infinite;
+  }
+  .hero-scroll svg{ width:14px; height:20px; }
+
+  @keyframes bob{
+    0%,100%{ transform:translateY(0); opacity:0.6; }
+    50%{ transform:translateY(6px); opacity:1; }
+  }
+
+  /* ---------- SPINE ---------- */
+  .spine-wrap{
+    position:relative;
+    max-width:1040px;
+    margin:0 auto;
+    padding:0 6vw 14vh;
+  }
+
+  .spine{
+    position:absolute;
+    left:50%;
+    top:0;
+    bottom:0;
+    width:2px;
+    background:var(--line);
+    transform:translateX(-50%);
+    z-index:0;
+  }
+  .spine-fill{
+    position:absolute;
+    left:0; top:0; width:100%;
+    height:0%;
+    background:linear-gradient(to bottom, var(--html), var(--css), var(--api), var(--react), var(--node), var(--ai));
+    transition:height 0.1s linear;
+  }
+
+  /* ---------- LAYER SECTION ---------- */
+  .layer{
+    position:relative;
+    z-index:1;
+    padding:9vh 0;
+    opacity:0;
+    transform:translateY(28px);
+    transition:opacity 0.7s ease, transform 0.7s ease;
+  }
+  .layer.in{ opacity:1; transform:translateY(0); }
+
+  .node-dot{
+    position:absolute;
+    left:50%;
+    top:9vh;
+    width:18px; height:18px;
+    border-radius:50%;
+    transform:translateX(-50%);
+    background:var(--bg);
+    border:3px solid var(--c);
+    box-shadow:0 0 0 6px var(--bg), 0 0 18px 2px var(--c-glow);
+    z-index:2;
+  }
+
+  .layer-card{
+    background:var(--bg-soft);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:2.6rem 2.4rem;
+    position:relative;
+    overflow:hidden;
+  }
+  .layer-card::before{
+    content:'';
+    position:absolute;
+    top:0; left:0; right:0; height:3px;
+    background:var(--c);
+  }
+
+  .layer-head{
+    display:flex;
+    align-items:baseline;
+    gap:0.9rem;
+    margin-bottom:0.4rem;
+    flex-wrap:wrap;
+  }
+
+  .layer-tag{
+    font-family:var(--mono);
+    font-size:0.72rem;
+    letter-spacing:0.12em;
+    color:var(--c);
+    border:1px solid var(--c);
+    padding:0.18rem 0.55rem;
+    border-radius:999px;
+  }
+
+  .layer-head h2{
+    font-family:var(--display);
+    font-size:clamp(1.5rem, 3vw, 2.1rem);
+    font-weight:600;
+  }
+
+  .layer-role{
+    font-family:var(--mono);
+    font-size:0.85rem;
+    color:var(--ink-dim);
+    margin-bottom:1.4rem;
+  }
+
+  .layer-body{
+    display:grid;
+    grid-template-columns:1.05fr 0.95fr;
+    gap:2.4rem;
+    align-items:start;
+  }
+  @media (max-width:760px){
+    .layer-body{ grid-template-columns:1fr; }
+  }
+
+  .layer-desc p{
+    color:var(--ink-dim);
+    font-size:0.97rem;
+    margin-bottom:1rem;
+  }
+  .layer-desc p:last-child{ margin-bottom:0; }
+  .layer-desc strong{ color:var(--ink); font-weight:600; }
+
+  .diagram{
+    background:#0B0E13;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:1.1rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:170px;
+  }
+  .diagram svg{ width:100%; height:auto; max-height:200px; }
+
+  .connector{
+    margin-top:1.6rem;
+    padding-top:1.2rem;
+    border-top:1px dashed var(--line);
+    font-family:var(--mono);
+    font-size:0.82rem;
+    color:var(--ink-dim);
+    display:flex;
+    align-items:center;
+    gap:0.6rem;
+  }
+  .connector .arrow{ color:var(--c); font-weight:600; }
+  .connector b{ color:var(--ink); font-weight:500; }
+
+  /* ---------- FOOTER ---------- */
+  .footer{
+    text-align:center;
+    padding:8vh 6vw 10vh;
+    border-top:1px solid var(--line);
+  }
+  .footer h3{
+    font-family:var(--display);
+    font-size:1.6rem;
+    margin-bottom:0.8rem;
+  }
+  .footer p{
+    color:var(--ink-dim);
+    max-width:42ch;
+    margin:0 auto;
+    font-size:0.95rem;
+  }
+  .footer .credits{
+    margin-top:2.2rem;
+    font-family:var(--mono);
+    font-size:0.72rem;
+    color:var(--ink-dim);
+    display:flex;
+    gap:0.5rem;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+  .footer .credits span{
+    padding:0.2rem 0.55rem;
+    border:1px solid var(--line);
+    border-radius:999px;
+  }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-eyebrow">A vertical map of the modern web stack</div>
+  <h1>From <span class="grad">markup</span> to <span class="grad">machine intelligence</span></h1>
+  <p>Six layers, one continuous signal. Scroll down to follow a single request as it moves from the page you see, through the server that built it, to the model that reasons about it.</p>
+  <div class="hero-scroll">
+    <span>SCROLL</span>
+    <svg viewBox="0 0 14 20" fill="none"><path d="M7 1V19M7 19L1 13M7 19L13 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+</section>
+
+<div class="spine-wrap">
+  <div class="spine"><div class="spine-fill" id="spineFill"></div></div>
+
+  <!-- HTML -->
+  <div class="layer" data-layer style="--c:var(--html); --c-glow: rgba(201,123,74,0.45);">
+    <div class="node-dot"></div>
+    <div class="layer-card">
+      <div class="layer-head">
+        <span class="layer-tag">LAYER 01</span>
+        <h2>HTML</h2>
+      </div>
+      <div class="layer-role">// the skeleton — what exists on the page</div>
+      <div class="layer-body">
+        <div class="layer-desc">
+          <p><strong>HTML gives the browser its nouns.</strong> Every heading, button, and image is a tagged piece of meaning before any style or behavior touches it.</p>
+          <p>Semantic tags like <code>&lt;nav&gt;</code>, <code>&lt;article&gt;</code>, and <code>&lt;button&gt;</code> aren't cosmetic — screen readers, search engines, and your own CSS selectors all key off this structure.</p>
+        </div>
+        <div class="diagram">
+          <svg viewBox="0 0 260 160" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="10" width="240" height="30" rx="4" fill="none" stroke="#C97B4A" stroke-width="1.5"/>
+            <text x="20" y="29" font-family="JetBrains Mono" font-size="10" fill="#C97B4A">&lt;header&gt;</text>
+            <rect x="10" y="48" width="110" height="100" rx="4" fill="none" stroke="#C97B4A" stroke-width="1.5"/>
+            <text x="20" y="64" font-family="JetBrains Mono" font-size="10" fill="#C97B4A">&lt;nav&gt;</text>
+            <rect x="130" y="48" width="120" height="100" rx="4" fill="none" stroke="#C97B4A" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <text x="140" y="64" font-family="JetBrains Mono" font-size="10" fill="#C97B4A">&lt;main&gt;</text>
+            <rect x="140" y="76" width="100" height="16" rx="3" fill="#C97B4A" opacity="0.18"/>
+            <rect x="140" y="98" width="100" height="16" rx="3" fill="#C97B4A" opacity="0.18"/>
+            <rect x="140" y="120" width="60" height="16" rx="3" fill="#C97B4A" opacity="0.18"/>
+          </svg>
+        </div>
+      </div>
+      <div class="connector"><span class="arrow">↓</span> structure is in place. <b>CSS</b> arrives to give it shape and feeling.</div>
+    </div>
+  </div>
+
+  <!-- CSS -->
+  <div class="layer" data-layer style="--c:var(--css); --c-glow: rgba(63,167,150,0.45);">
+    <div class="node-dot"></div>
+    <div class="layer-card">
+      <div class="layer-head">
+        <span class="layer-tag">LAYER 02</span>
+        <h2>CSS</h2>
+      </div>
+      <div class="layer-role">// the surface — how it looks and responds</div>
+      <div class="layer-body">
+        <div class="layer-desc">
+          <p><strong>CSS turns structure into an experience.</strong> The cascade resolves competing rules; specificity decides who wins.</p>
+          <p>Flexbox and Grid handle layout, media queries handle different screens, and transitions add the small motions that make an interface feel alive rather than static.</p>
+        </div>
+        <div class="diagram">
+          <svg viewBox="0 0 260 160" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="70" height="120" rx="6" fill="#3FA796" opacity="0.15" stroke="#3FA796" stroke-width="1.5"/>
+            <rect x="95" y="20" width="70" height="55" rx="6" fill="#3FA796" opacity="0.25" stroke="#3FA796" stroke-width="1.5"/>
+            <rect x="95" y="85" width="70" height="55" rx="6" fill="#3FA796" opacity="0.25" stroke="#3FA796" stroke-width="1.5"/>
+            <rect x="180" y="20" width="70" height="120" rx="6" fill="#3FA796" opacity="0.15" stroke="#3FA796" stroke-width="1.5"/>
+            <text x="20" y="86" font-family="JetBrains Mono" font-size="9" fill="#3FA796">flex</text>
+            <text x="105" y="52" font-family="JetBrains Mono" font-size="9" fill="#3FA796">grid</text>
+          </svg>
+        </div>
+      </div>
+      <div class="connector"><span class="arrow">↓</span> a styled, static page exists. To get live data, it calls an <b>API</b>.</div>
+    </div>
+  </div>
+
+  <!-- API -->
+  <div class="layer" data-layer style="--c:var(--api); --c-glow: rgba(224,179,58,0.45);">
+    <div class="node-dot"></div>
+    <div class="layer-card">
+      <div class="layer-head">
+        <span class="layer-tag">LAYER 03</span>
+        <h2>API</h2>
+      </div>
+      <div class="layer-role">// the contract — how the frontend asks, and the backend answers</div>
+      <div class="layer-body">
+        <div class="layer-desc">
+          <p><strong>An API is a promise about shape.</strong> The browser sends a request — usually <code>GET</code>, <code>POST</code>, <code>PUT</code>, or <code>DELETE</code> — to a URL, and gets back data, almost always JSON.</p>
+          <p>REST keeps that contract simple and predictable; this is the seam where frontend and backend stop needing to know anything about each other's internals.</p>
+        </div>
+        <div class="diagram">
+          <svg viewBox="0 0 260 160" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="55" width="70" height="50" rx="8" fill="none" stroke="#E0B33A" stroke-width="1.5"/>
+            <text x="22" y="84" font-family="JetBrains Mono" font-size="10" fill="#E0B33A">client</text>
+            <rect x="180" y="55" width="70" height="50" rx="8" fill="none" stroke="#E0B33A" stroke-width="1.5"/>
+            <text x="190" y="84" font-family="JetBrains Mono" font-size="10" fill="#E0B33A">server</text>
+            <line x1="80" y1="70" x2="180" y2="70" stroke="#E0B33A" stroke-width="1.5" marker-end="url(#arrowY)"/>
+            <text x="95" y="63" font-family="JetBrains Mono" font-size="8" fill="#E0B33A">GET /data</text>
+            <line x1="180" y1="92" x2="80" y2="92" stroke="#E0B33A" stroke-width="1.5" marker-end="url(#arrowY2)"/>
+            <text x="100" y="108" font-family="JetBrains Mono" font-size="8" fill="#E0B33A">200 JSON</text>
+            <defs>
+              <marker id="arrowY" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#E0B33A"/></marker>
+              <marker id="arrowY2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#E0B33A"/></marker>
+            </defs>
+          </svg>
+        </div>
+      </div>
+      <div class="connector"><span class="arrow">↓</span> the contract is defined. <b>React</b> builds the UI that consumes it.</div>
+    </div>
+  </div>
+
+  <!-- REACT -->
+  <div class="layer" data-layer style="--c:var(--react); --c-glow: rgba(139,127,214,0.45);">
+    <div class="node-dot"></div>
+    <div class="layer-card">
+      <div class="layer-head">
+        <span class="layer-tag">LAYER 04</span>
+        <h2>React</h2>
+      </div>
+      <div class="layer-role">// the composition — UI as components and state</div>
+      <div class="layer-body">
+        <div class="layer-desc">
+          <p><strong>React turns the page into a tree of components</strong> — small functions that take data in (<code>props</code>) and return what should be on screen.</p>
+          <p><code>useState</code> and <code>useEffect</code> let a component remember things and react to change; when data from the API updates state, React re-renders only what actually needs to change.</p>
+        </div>
+        <div class="diagram">
+          <svg viewBox="0 0 260 160" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="130" cy="25" r="14" fill="none" stroke="#8B7FD6" stroke-width="1.5"/>
+            <text x="122" y="29" font-family="JetBrains Mono" font-size="8" fill="#8B7FD6">App</text>
+            <line x1="130" y1="39" x2="65" y2="85" stroke="#8B7FD6" stroke-width="1.2"/>
+            <line x1="130" y1="39" x2="195" y2="85" stroke="#8B7FD6" stroke-width="1.2"/>
+            <circle cx="65" cy="95" r="13" fill="none" stroke="#8B7FD6" stroke-width="1.5"/>
+            <text x="48" y="99" font-family="JetBrains Mono" font-size="7.5" fill="#8B7FD6">Header</text>
+            <circle cx="195" cy="95" r="13" fill="none" stroke="#8B7FD6" stroke-width="1.5"/>
+            <text x="178" y="99" font-family="JetBrains Mono" font-size="7.5" fill="#8B7FD6">List</text>
+            <line x1="195" y1="108" x2="160" y2="140" stroke="#8B7FD6" stroke-width="1.2"/>
+            <line x1="195" y1="108" x2="230" y2="140" stroke="#8B7FD6" stroke-width="1.2"/>
+            <circle cx="160" cy="148" r="10" fill="none" stroke="#8B7FD6" stroke-width="1.5"/>
+            <circle cx="230" cy="148" r="10" fill="none" stroke="#8B7FD6" stroke-width="1.5"/>
+          </svg>
+        </div>
+      </div>
+      <div class="connector"><span class="arrow">↓</span> the UI is composed. <b>Node</b> is what runs the server side of that API call.</div>
+    </div>
+  </div>
+
+  <!-- NODE -->
+  <div class="layer" data-layer style="--c:var(--node); --c-glow: rgba(111,168,111,0.45);">
+    <div class="node-dot"></div>
+    <div class="layer-card">
+      <div class="layer-head">
+        <span class="layer-tag">LAYER 05</span>
+        <h2>Node.js</h2>
+      </div>
+      <div class="layer-role">// the runtime — where requests get handled</div>
+      <div class="layer-body">
+        <div class="layer-desc">
+          <p><strong>Node runs JavaScript outside the browser</strong>, which is what lets a server written in the same language as the frontend handle incoming requests.</p>
+          <p>Its event loop processes I/O — database queries, file reads, outbound API calls — without blocking, so one process can serve many requests concurrently. Frameworks like Express map routes to logic.</p>
+        </div>
+        <div class="diagram">
+          <svg viewBox="0 0 260 160" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="130" cy="80" rx="100" ry="55" fill="none" stroke="#6FA86F" stroke-width="1.5"/>
+            <text x="105" y="40" font-family="JetBrains Mono" font-size="9" fill="#6FA86F">event loop</text>
+            <circle cx="80" cy="80" r="9" fill="none" stroke="#6FA86F" stroke-width="1.3"/>
+            <circle cx="130" cy="100" r="9" fill="none" stroke="#6FA86F" stroke-width="1.3"/>
+            <circle cx="180" cy="80" r="9" fill="none" stroke="#6FA86F" stroke-width="1.3"/>
+            <circle cx="130" cy="60" r="9" fill="none" stroke="#6FA86F" stroke-width="1.3"/>
+            <path d="M89,80 L121,98 M139,98 L171,80 M130,69 L130,91" stroke="#6FA86F" stroke-width="1" stroke-dasharray="2 2"/>
+          </svg>
+        </div>
+      </div>
+      <div class="connector"><span class="arrow">↓</span> the request reaches the server. Increasingly, that server calls an <b>AI engine</b>.</div>
+    </div>
+  </div>
+
+  <!-- AI -->
+  <div class="layer" data-layer style="--c:var(--ai); --c-glow: rgba(214,83,109,0.45);">
+    <div class="node-dot"></div>
+    <div class="layer-card">
+      <div class="layer-head">
+        <span class="layer-tag">LAYER 06</span>
+        <h2>AI Engine Integration</h2>
+      </div>
+      <div class="layer-role">// the reasoning — where the response gets intelligence</div>
+      <div class="layer-body">
+        <div class="layer-desc">
+          <p><strong>From the server, a request to a model API</strong> — sending a prompt and context, receiving generated text, a classification, or a structured result back as JSON, same as any other API call.</p>
+          <p>The pattern repeats what every layer below already established: the server holds the API key and orchestration logic, the model does the reasoning, and the response flows back down through Node → API → React → the page you started on.</p>
+        </div>
+        <div class="diagram">
+          <svg viewBox="0 0 260 160" xmlns="http://www.w3.org/2000/svg">
+            <rect x="15" y="60" width="60" height="40" rx="6" fill="none" stroke="#D6536D" stroke-width="1.5"/>
+            <text x="22" y="83" font-family="JetBrains Mono" font-size="8" fill="#D6536D">server</text>
+            <path d="M80,80 Q130,40 180,80" stroke="#D6536D" stroke-width="1.5" fill="none" marker-end="url(#arrowAI)"/>
+            <text x="105" y="48" font-family="JetBrains Mono" font-size="7.5" fill="#D6536D">prompt</text>
+            <circle cx="210" cy="80" r="32" fill="none" stroke="#D6536D" stroke-width="1.5"/>
+            <circle cx="210" cy="80" r="3" fill="#D6536D"/>
+            <circle cx="198" cy="70" r="2" fill="#D6536D"/>
+            <circle cx="222" cy="70" r="2" fill="#D6536D"/>
+            <circle cx="198" cy="92" r="2" fill="#D6536D"/>
+            <circle cx="222" cy="92" r="2" fill="#D6536D"/>
+            <line x1="210" y1="80" x2="198" y2="70" stroke="#D6536D" stroke-width="0.8"/>
+            <line x1="210" y1="80" x2="222" y2="70" stroke="#D6536D" stroke-width="0.8"/>
+            <line x1="210" y1="80" x2="198" y2="92" stroke="#D6536D" stroke-width="0.8"/>
+            <line x1="210" y1="80" x2="222" y2="92" stroke="#D6536D" stroke-width="0.8"/>
+            <path d="M180,100 Q130,135 80,100" stroke="#D6536D" stroke-width="1.5" fill="none" stroke-dasharray="3 3" marker-end="url(#arrowAI2)"/>
+            <text x="105" y="128" font-family="JetBrains Mono" font-size="7.5" fill="#D6536D">response</text>
+            <defs>
+              <marker id="arrowAI" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#D6536D"/></marker>
+              <marker id="arrowAI2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#D6536D"/></marker>
+            </defs>
+          </svg>
+        </div>
+      </div>
+      <div class="connector"><span class="arrow">↑</span> the response travels back up every layer to render on the page you saw first.</div>
+    </div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <h3>One request, six layers, no magic</h3>
+  <p>Every layer above is just a more specific case of the one below it solving a real constraint: show something, style it, fetch data, compose it, run it somewhere, make it smarter.</p>
+  <div class="credits">
+    <span>HTML</span><span>CSS</span><span>API</span><span>React</span><span>Node.js</span><span>AI Engine</span>
+  </div>
+</footer>
+
+<script>
+  // Scroll-reveal for each layer
+  const layers = document.querySelectorAll('[data-layer]');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.18 });
+  layers.forEach(l => io.observe(l));
+
+  // Spine fill follows scroll progress through the spine-wrap
+  const spineWrap = document.querySelector('.spine-wrap');
+  const spineFill = document.getElementById('spineFill');
+  function updateSpine(){
+    const rect = spineWrap.getBoundingClientRect();
+    const vh = window.innerHeight;
+    const total = rect.height;
+    const scrolled = Math.min(Math.max(vh * 0.5 - rect.top, 0), total);
+    const pct = total > 0 ? (scrolled / total) * 100 : 0;
+    spineFill.style.height = pct + '%';
+  }
+  document.addEventListener('scroll', updateSpine, { passive: true });
+  window.addEventListener('resize', updateSpine);
+  updateSpine();
+</script>
+
+</body>
+</html>
